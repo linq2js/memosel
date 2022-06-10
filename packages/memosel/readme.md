@@ -155,13 +155,14 @@ With memosel
 
 ```js
 import memosel from "memosel";
+
 const getWorldData = (state) => state.world;
 const getCountryData = memosel()
-  // create family selector that use keySelector, the keySelector accepts "country" argument and we use country as the key of selector cache
+  // create selector factory that use keySelector, the keySelector accepts "country" argument and we use country as the key of selector cache
   // keySelector can accept multiple arguments and the key array can contains multiple items
-  .family((country) => [country])
+  .key((country) => [country])
   .use("world", getWorldData)
-  // the second and more arguments are the selected keys (they are returned from keySelector of family())
+  // the second and more arguments are the selected keys (they are returned from keySelector of keys())
   .build(({ world }, country) => extractData(world, country));
 
 const afghanistan = getCountryData("vietnam")(state);
@@ -221,7 +222,7 @@ const getTodos = (state, listId) => state.todoLists[listId].todos;
 
 const getVisibleTodos = memosel()
   // extract listId and use it as selector key
-  .family((props) => [props.listId])
+  .key((props) => [props.listId])
   .use("visibilityFilter", getVisibilityFilter)
   .use("todos", getTodos)
   .build(({ visibilityFilter, todos }) => {

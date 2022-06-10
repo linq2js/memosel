@@ -37,7 +37,7 @@ test("family", () => {
     state.todoLists[listId].todos;
 
   const getVisibleTodos = memosel()
-    .family((props: Props) => [props.listId])
+    .key((props: Props) => [props.listId])
     .use("filter", getFilter)
     .use("todos", getTodos)
     .build((selected) => {

@@ -6,10 +6,10 @@ export interface Selector<P, R> extends Function {
   clear(): void;
 }
 
-export interface FamilySelector<F extends any[], P, R> extends Function {
+export interface SelectorFactory<F extends any[], P, R> extends Function {
   (...args: F): Selector<P, R>;
   /**
-   * clear all cached values of the family
+   * clear all cached values of the factory
    */
   clear(): void;
 }
@@ -17,7 +17,7 @@ export interface FamilySelector<F extends any[], P, R> extends Function {
 export interface SelectorBuilder<
   TParam = {},
   TSelected = {},
-  TFamily = void,
+  TFactory = void,
   TKey extends any[] = never
 > {
   /**
@@ -32,7 +32,7 @@ export interface SelectorBuilder<
   ): SelectorBuilder<
     TParam & P,
     TSelected & { [key in keyof S]: ReturnType<S[key]> },
-    TFamily,
+    TFactory,
     TKey
   >;
   /**
@@ -43,14 +43,14 @@ export interface SelectorBuilder<
   use<N extends string = string, P = TParam, R = any>(
     name: N,
     selector: (param: P, ...args: TKey) => R
-  ): SelectorBuilder<TParam & P, TSelected & { [key in N]: R }, TFamily, TKey>;
+  ): SelectorBuilder<TParam & P, TSelected & { [key in N]: R }, TFactory, TKey>;
   /**
    * use 'input' selector that uses to select a pie of value from input param
    * @param selector
    */
   use<P = TParam, R extends Record<string, any> = any>(
     selector: (param: P, ...args: TKey) => R
-  ): SelectorBuilder<TParam & P, TSelected & R, TFamily, TKey>;
+  ): SelectorBuilder<TParam & P, TSelected & R, TFactory, TKey>;
   /**
    * set equalCompareFn, the equalCompareFn uses to compare previous and next param of the selector,
    * if they are identical, the previous selected result will be returned
@@ -68,22 +68,22 @@ export interface SelectorBuilder<
    */
   ttl(value: number): this;
   /**
-   * create a family selector that accepts single argument with type P
+   * create a selector factory that accepts single argument with type P
    */
-  family<P = any>(): SelectorBuilder<TParam, TSelected, [P], [P]>;
+  key<P = any>(): SelectorBuilder<TParam, TSelected, [P], [P]>;
   /**
-   * create a family selector with keySelector, the family selector accepts all arguments of keySelector.
+   * create a selector factory with keySelector, the selector factory accepts all arguments of keySelector.
    * The keySelector returns a list of key, those keys will be use for caching the result selector
    * @param keySelector
    */
-  family<P extends any[], K extends any[]>(
+  key<P extends any[], K extends any[]>(
     keySelector: (...args: P) => K
   ): SelectorBuilder<TParam, TSelected, P, K>;
   /**
    * build the memozied structured selector
    */
-  build(): TFamily extends any[]
-    ? FamilySelector<TFamily, TParam, TSelected>
+  build(): TFactory extends any[]
+    ? SelectorFactory<TFactory, TParam, TSelected>
     : Selector<TParam, TSelected>;
   /**
    * build the memoized selector with 'result' selector
@@ -91,8 +91,8 @@ export interface SelectorBuilder<
    */
   build<R>(
     resultSelector: (selected: TSelected, ...args: TKey) => R
-  ): TFamily extends any[]
-    ? FamilySelector<TFamily, TParam, R>
+  ): TFactory extends any[]
+    ? SelectorFactory<TFactory, TParam, R>
     : Selector<TParam, R>;
 }
 
@@ -208,7 +208,7 @@ const memosel: Memosel = (): SelectorBuilder => {
       size = value;
       return this;
     },
-    family(selector?: Function): any {
+    key(selector?: Function): any {
       keySelector = selector || defaultKeySelector;
       return this;
     },
