@@ -109,8 +109,41 @@ export type Memosel = {
   <TParam>(): SelectorBuilder<TParam>;
 };
 
+type CacheRemovingEntry = { expiry: number; callback: Function };
+
 const defaultKeySelector = (...args: any[]) => args;
 const strictEqual = (a: any, b: any) => a === b;
+const enqueue = Promise.resolve(null).then.bind(Promise.resolve(null));
+const cacheRemovingQueue: CacheRemovingEntry[] = [];
+let caceRemovingEntry: CacheRemovingEntry | undefined;
+
+const startCacheRemovingTask = () => {
+  // prev task is running
+  if (caceRemovingEntry) return;
+  caceRemovingEntry = cacheRemovingQueue.shift();
+  // queue is empty
+  if (!caceRemovingEntry) return;
+  const nextTicks = caceRemovingEntry.expiry - Date.now();
+  const performRemoving = () => {
+    caceRemovingEntry?.callback();
+    caceRemovingEntry = undefined;
+    startCacheRemovingTask();
+  };
+  // expired, remove immediately
+  if (nextTicks <= 0) {
+    performRemoving();
+  } else {
+    setTimeout(performRemoving, nextTicks);
+  }
+};
+
+const addToCaceRemovingQueue = (expiry: number, callback: Function) => {
+  enqueue(() => {
+    cacheRemovingQueue.push({ expiry, callback });
+    cacheRemovingQueue.sort((a, b) => a.expiry - b.expiry);
+    startCacheRemovingTask();
+  });
+};
 
 const memosel: Memosel = (): SelectorBuilder => {
   let selectorEntries: [string, Function][];
@@ -139,6 +172,11 @@ const memosel: Memosel = (): SelectorBuilder => {
 
         if (!entry.selected || entry.expiry < now) {
           entry.expiry = ttl ? now + ttl : Number.MAX_VALUE;
+          if (ttl) {
+            addToCaceRemovingQueue(entry.expiry, () => {
+              resultCache.length = 0;
+            });
+          }
           let hasChange = false;
           const nextSelected: Record<string, any> = {};
           selectorEntries.forEach(([key, selector]) => {

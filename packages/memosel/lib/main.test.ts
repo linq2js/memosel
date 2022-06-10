@@ -1,7 +1,7 @@
 import memosel from "./main";
 import { test, expect } from "vitest";
 
-test("family", () => {
+test("factory", () => {
   type Todo = { id: number; completed: boolean };
   type TodoList = { filter: "all" | "completed" | "active"; todos: Todo[] };
   type State = {
@@ -89,4 +89,20 @@ test("basic", () => {
   const r2 = selector(1);
   expect(r1).toEqual({ result: 2 });
   expect(r1).toBe(r2);
+});
+
+test("cace size", () => {
+  const selector = memosel()
+    .size(3)
+    .use("value", (input: number) => input)
+    .build(({ value }) => ({ result: value * 2 }));
+  const r1 = selector(1);
+  const r2 = selector(2);
+  const r3 = selector(3);
+  const r11 = selector(1);
+  const r22 = selector(2);
+  const r33 = selector(3);
+  expect(r1).toBe(r11);
+  expect(r2).toBe(r22);
+  expect(r3).toBe(r33);
 });
