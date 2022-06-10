@@ -1,0 +1,40 @@
+{
+  "name": "memosel",
+  "version": "0.0.0",
+  "description": "A library for creating memoized \"selector\" functions",
+  "author": "linq2js <linqtojs@gmail.com>",
+  "repository": {
+    "url": "https://github.com/linq2js/memosel"
+  },
+  "homepage": "https://linq2js.github.io/memosel/",
+  "license": "ISC",
+  "scripts": {
+    "prepublishOnly": "yarn test && yarn && yarn build",
+    "lint": "eslint lib/ --ext .js,.jsx,.ts,.tsx",
+    "test": "vitest run",
+    "clean": "rm -rf dist build package",
+    "ts-node": "ts-node",
+    "build": "rimraf dist && tsc"
+  },
+  "main": "dist/tsc/main.js",
+  "types": "dist/tsc/main.d.ts",
+  "directories": {
+    "lib": "lib"
+  },
+  "files": [
+    "lib",
+    "dist/tsc"
+  ],
+  "keywords": [
+    "react",
+    "redux",
+    "selector",
+    "memoized",
+    "cache"
+  ],
+  "dependencies": {
+  },
+  "devDependencies": {
+  },
+  "peerDependenciesMeta": {}
+}
