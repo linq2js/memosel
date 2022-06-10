@@ -13,13 +13,13 @@ A library for creating memoized "selector" functions
 
 ## Installation
 
-**with NPM**
+with NPM
 
 ```bash
 npm i rtkex --save
 ```
 
-**with YARN**
+with YARN
 
 ```bash
 yarn add rtkex
@@ -128,7 +128,7 @@ const makeGetCountryData = country => {
 }
 ```
 
-**With re-reselect**
+With re-reselect
 
 ```js
 import { createCachedSelector } from "re-reselect";
@@ -151,7 +151,7 @@ const afghanistanAgain = getCountryData(state, "afghanistan");
 // afghanistan === afghanistanAgain
 ```
 
-**With memosel**
+With memosel
 
 ```js
 import memosel from "memosel";
@@ -176,7 +176,7 @@ console.log(getCountryData("vietnam") === getCountryData("vietnam"));
 This example shows how re-reselect would solve the scenario described in the [Reselect docs](https://github.com/reduxjs/reselect#sharing-selectors-with-props-across-multiple-component-instances):
 how to share a selector across multiple components while passing in props and retaining memoization?
 
-**With re-reselect**
+With re-reselect
 
 ```js
 import { createCachedSelector } from "re-reselect";
@@ -209,7 +209,7 @@ const getVisibleTodos = createCachedSelector(
 export default getVisibleTodos;
 ```
 
-**With memosel**
+With memosel
 
 ```js
 import memosel from "memosel";
