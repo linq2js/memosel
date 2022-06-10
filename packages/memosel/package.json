@@ -1,6 +1,6 @@
 {
   "name": "memosel",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "A library for creating memoized \"selector\" functions",
   "author": "linq2js <linqtojs@gmail.com>",
   "repository": {
@@ -32,9 +32,5 @@
     "memoized",
     "cache"
   ],
-  "dependencies": {
-  },
-  "devDependencies": {
-  },
   "peerDependenciesMeta": {}
 }
