@@ -1,3 +1,8 @@
+export interface Options {
+  size?: number;
+  ttl?: number;
+}
+
 export interface Selector<P, R> extends Function {
   (param: P): R;
   /**
@@ -106,7 +111,19 @@ type ResultCacheEntry = {
 
 export type Memosel = {
   (): SelectorBuilder;
-  <TParam>(): SelectorBuilder<TParam>;
+  <P>(): SelectorBuilder<P>;
+  /**
+   * create a memoized function
+   */
+  <P, R>(fn: (param: P) => R, options?: Options): Selector<P, R>;
+  /**
+   * create memoized function factory
+   */
+  <F extends any[], R, P, K extends any[]>(
+    fn: (param: P, ...args: K) => R,
+    key: (...args: F) => K,
+    options?: Options
+  ): SelectorFactory<F, P, R>;
 };
 
 type CacheRemovingEntry = { expiry: number; callback: Function };
@@ -145,7 +162,7 @@ const addToCaceRemovingQueue = (expiry: number, callback: Function) => {
   });
 };
 
-const memosel: Memosel = (): SelectorBuilder => {
+const createBuilder = (): SelectorBuilder => {
   let selectorEntries: [string, Function][];
   let keySelector: Function;
   let resultSelector: Function | undefined;
@@ -167,7 +184,10 @@ const memosel: Memosel = (): SelectorBuilder => {
         if (!entry) {
           entry = { param, expiry: 0 };
           resultCache.unshift(entry);
-          if (resultCache.length > size) resultCache.pop();
+          // remove last one if the cache has been exceeded
+          if (size && resultCache.length > size) {
+            resultCache.pop();
+          }
         }
 
         if (!entry.selected || entry.expiry < now) {
@@ -188,6 +208,19 @@ const memosel: Memosel = (): SelectorBuilder => {
             ) {
               hasChange = true;
             }
+          });
+          selectorList.forEach((selector) => {
+            const nextMap = selector(param, ...keys);
+            if (!nextMap) return;
+            Object.entries(nextMap).forEach(([key, value]) => {
+              nextSelected[key] = value;
+              if (
+                !entry?.selected ||
+                nextSelected[key] !== entry?.selected[key]
+              ) {
+                hasChange = true;
+              }
+            });
           });
           if (hasChange) {
             entry.selected = nextSelected;
@@ -222,7 +255,7 @@ const memosel: Memosel = (): SelectorBuilder => {
     return map.selector;
   };
 
-  return {
+  const builder: SelectorBuilder = {
     use(...args: any[]): any {
       // use(selector)
       if (typeof args[0] === "function") {
@@ -265,6 +298,31 @@ const memosel: Memosel = (): SelectorBuilder => {
       );
     },
   };
+
+  return builder;
+};
+
+const memosel: Memosel = (...args: any[]): any => {
+  // overloads
+  if (args.length) {
+    let factory: any;
+    let selector: any;
+    let options: Options | undefined;
+    if (typeof args[1] === "function") {
+      [selector, factory, options] = args;
+    } else {
+      [selector, options] = args;
+    }
+    const { ttl, size } = options || {};
+    let builder = createBuilder();
+    if (typeof ttl !== "undefined") builder = builder.ttl(ttl);
+    if (typeof size !== "undefined") builder = builder.size(size);
+    if (factory) builder = builder.key(factory);
+    return builder
+      .use("param", (x: any) => x)
+      .build(({ param }) => selector(param));
+  }
+  return createBuilder();
 };
 
 export default memosel;

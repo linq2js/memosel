@@ -102,7 +102,37 @@ test("cace size", () => {
   const r11 = selector(1);
   const r22 = selector(2);
   const r33 = selector(3);
+  expect(r1).toEqual({ result: 2 });
+  expect(r2).toEqual({ result: 4 });
+  expect(r3).toEqual({ result: 6 });
   expect(r1).toBe(r11);
   expect(r2).toBe(r22);
   expect(r3).toBe(r33);
+});
+
+test("memoized function with size", () => {
+  const memoized = memosel((value: number) => ({ result: value * 2 }), {
+    size: 3,
+  });
+  const r1 = memoized(1);
+  const r2 = memoized(2);
+  const r3 = memoized(3);
+  const r11 = memoized(1);
+  const r22 = memoized(2);
+  const r33 = memoized(3);
+  expect(r1).toEqual({ result: 2 });
+  expect(r2).toEqual({ result: 4 });
+  expect(r3).toEqual({ result: 6 });
+  expect(r1).toBe(r11);
+  expect(r2).toBe(r22);
+  expect(r3).toBe(r33);
+});
+
+test("memoized function", () => {
+  const memoized = memosel((value: number) => ({ result: value * 2 }));
+  const r1 = memoized(1);
+  const r2 = memoized(1);
+  console.log(r1, r2);
+  expect(r1).toEqual({ result: 2 });
+  expect(r1).toBe(r2);
 });

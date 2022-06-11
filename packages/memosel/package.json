@@ -32,5 +32,9 @@
     "memoized",
     "cache"
   ],
+  "devDependencies": {
+    "vite": "^2.9.9",
+    "vitest": "^0.13.1"
+  },
   "peerDependenciesMeta": {}
 }
