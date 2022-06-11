@@ -1,6 +1,7 @@
 export interface Options {
   size?: number;
   ttl?: number;
+  compare?: (a: any, b: any) => boolean;
 }
 
 export interface Selector<P, R> extends Function {
@@ -313,10 +314,11 @@ const memosel: Memosel = (...args: any[]): any => {
     } else {
       [selector, options] = args;
     }
-    const { ttl, size } = options || {};
+    const { ttl, size, compare } = options || {};
     let builder = createBuilder();
     if (typeof ttl !== "undefined") builder = builder.ttl(ttl);
     if (typeof size !== "undefined") builder = builder.size(size);
+    if (typeof compare !== "undefined") builder = builder.compare(compare);
     if (factory) builder = builder.key(factory);
     return builder
       .use("param", (x: any) => x)

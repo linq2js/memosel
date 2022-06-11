@@ -5,7 +5,8 @@
     - [Basic Usage](#basic-usage)
     - [Join similar selectors](#join-similar-selectors)
     - [Avoid selector factories](#avoid-selector-factories)
-    - [API references](#api-references)
+    - [Creating simple memoized function](#creating-simple-memoized-function)
+  - [API references](#api-references)
 
 # `memosel`
 
@@ -244,6 +245,34 @@ const mapStateToProps = (state, props) => {
 };
 ```
 
-### API references
+### Creating simple memoized function
+
+```js
+import memosel from "memosel";
+
+const memoizedFunction1 = memosel((x) => ({ result: x * 2 }));
+const result1 = memoizedFunction1(1);
+const result2 = memoizedFunction1(1);
+console.log(result1 === result2); // true
+
+memoizedFunction1(2);
+const result3 = memoizedFunction1(1);
+console.log(result1 === result3); // false, because memoized function has cache size = 1 by default
+
+// create memoized function with unlimited cache size
+const memoizedFunction2 = memosel((x) => ({ result: x * 2 }), { size: 0 });
+const result1 = memoizedFunction2(1);
+const result2 = memoizedFunction2(2);
+const result3 = memoizedFunction2(3);
+
+const result11 = memoizedFunction2(1);
+const result22 = memoizedFunction2(2);
+const result33 = memoizedFunction2(3);
+console.log(result1 === result11); // true
+console.log(result2 === result22); // true
+console.log(result3 === result33); // true
+```
+
+## API references
 
 https://linq2js.github.io/memosel/
