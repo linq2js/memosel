@@ -17,13 +17,13 @@ A library for creating memoized "selector" functions
 with NPM
 
 ```bash
-npm i rtkex --save
+npm i memosel --save
 ```
 
 with YARN
 
 ```bash
-yarn add rtkex
+yarn add memosel
 ```
 
 ## Features
